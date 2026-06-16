@@ -1,7 +1,7 @@
 // src/App.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ProductGrid } from './components/store/ProductGrid';
-import { mockProducts } from './utils/mockData';
+import { getProducts } from './services/db';
 import { CartProvider, useCart } from './context/CartContext';
 import type { Product } from './types';
 import { CartView } from './components/store/CartView';
@@ -13,8 +13,25 @@ import { CheckoutView } from './components/store/CheckoutView';
 const StoreFront = () => {
   const { totalItems, cart, updateQuantity } = useCart();
   const [lastAdded, setLastAdded] = useState<Product | null>(null);
-
   const [currentView, setCurrentView] = useState<'catalog' | 'cart' | 'checkout'>('catalog');
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error("Error cargando productos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProducts();
+  }, []);
 
   const handleProductAdd = (product: Product) => {
     setLastAdded(product);
@@ -65,7 +82,14 @@ const StoreFront = () => {
             />
           </div>
 
-          <ProductGrid products={mockProducts} onAdd={handleProductAdd} />
+          {/* Si está cargando mostramos un texto, si no, mostramos la cuadrícula */}
+          {loading ? (
+            <div className="text-center py-10 text-gray-500 font-medium">
+              Cargando catálogo...
+            </div>
+          ) : (
+            <ProductGrid products={products} onAdd={handleProductAdd} />
+          )}
         </main>
       )}
 

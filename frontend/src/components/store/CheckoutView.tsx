@@ -72,9 +72,16 @@ export const CheckoutView = ({ onBack }: Props) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const listaProductos = cart.map(item => 
-      `▪ ${item.quantity}x ${item.name} (S/ ${(item.price * item.quantity).toFixed(2)})`
-    ).join('\n');
+    const listaProductos = cart.map(item => {
+      const cargoEnvase = (item.isReturnable && !item.hasBottle) ? (item.returnableType === 'gaseosa' ? 2 : 1) : 0;
+      const subtotalItem = (item.price + cargoEnvase) * item.quantity;
+
+      let notaEnvase = '';
+      if (item.isReturnable) {
+        notaEnvase = item.hasBottle ? ' 🔄 (Deja envase)' : ` ⚠️ (No tiene envase: +S/ ${cargoEnvase * item.quantity})`;
+      }
+      return `▪ ${item.quantity}x ${item.name}${notaEnvase} (S/ ${subtotalItem.toFixed(2)})`;
+    }).join('\n');
 
     let detallePago = formData.paymentMethod === 'yape' ? '📱 Yape' : '💵 Efectivo';
       
