@@ -1,0 +1,6 @@
+# Ignorar dependencias
+node_modules/
+
+# Ignorar archivos del bot de WhatsApp (muy importante para no subir las sesiones)
+backend/.wwebjs_auth/
+backend/.wwebjs_cache/
